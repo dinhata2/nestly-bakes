@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6d3428">
+<title>NESTLY BAKES | Dinhata</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#fff8f4;color:#43231c;line-height:1.45}
+header{background:#6d3428;color:#fff;text-align:center;padding:35px 15px}
+header h1{font-size:36px;letter-spacing:2px}
+header p{margin-top:8px;font-size:17px}
+.container{max-width:850px;margin:auto;padding:25px 15px}
+.title{text-align:center;color:#6d3428;margin-bottom:20px;font-size:28px}
+.cake{background:#fff;margin-bottom:15px;padding:20px;border-radius:15px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.cake h2{color:#6d3428;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #eee}
+.row:last-child{border-bottom:none}
+.order,.admin{background:#fff;padding:25px;border-radius:15px;margin-top:30px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+label{display:block;font-weight:bold;margin-top:15px;margin-bottom:6px}
+input,textarea,select{width:100%;padding:13px;border:1px solid #d7b8ad;border-radius:8px;font-size:16px;background:#fff}
+textarea{height:90px;resize:vertical}
+button{width:100%;margin-top:22px;padding:15px;background:#25D366;color:#fff;border:0;border-radius:10px;font-size:18px;font-weight:bold;cursor:pointer}
+button:hover{background:#1ebe5d}
+.notice{margin-top:20px;padding:15px;background:#fff0e8;border-radius:10px;text-align:center;color:#8a3b2c;font-weight:bold}
+footer{background:#6d3428;color:#fff;text-align:center;padding:25px;margin-top:30px}
+.small{font-size:13px;color:#7a625b;margin-top:8px}
+@media(max-width:600px){
+header h1{font-size:30px}.title{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="shopName">NESTLY BAKES</h1>
+  <p id="shopSubtitle">Homemade Cakes • Dinhata</p>
+</header>
+
+<div class="container">
+  <h1 class="title">🍰 Cake Menu</h1>
+  <div id="menu"></div>
+
+  <div class="order">
+    <h1 class="title">🧁 Place Your Order</h1>
+
+    <label for="cake">Select Cake</label>
+    <select id="cake"></select>
+
+    <label for="name">Customer Name</label>
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <label for="address">Delivery Address</label>
+    <textarea id="address" placeholder="Enter your full address"></textarea>
+
+    <label for="date">Date of Delivery</label>
+    <input type="date" id="date">
+
+    <button onclick="sendOrder()">💬 Order on WhatsApp</button>
+
+    <div class="notice">📢 Please order at least one day before the delivery date.</div>
+  </div>
+
+</div>
+
+<footer>
+  <p id="footerName">NESTLY BAKES • Dinhata</p>
+  <p>Freshly Baked With Love ❤️</p>
+</footer>
+
+<script>
+
+const defaultSettings = {
+  name: "NESTLY BAKES",
+  subtitle: "Homemade Cakes • Dinhata",
+  products: [
+    {name:"Chocolate Cake", sizes:[["½ Pound","350"],["1 Pound","500"]]},
+    {name:"Black Forest Cake", sizes:[["½ Pound","350"],["1 Pound","500"]]},
+    {name:"White Forest Cake", sizes:[["½ Pound","320"],["1 Pound","440"]]},
+    {name:"Butterscotch Cake", sizes:[["½ Pound","330"],["1 Pound","460"]]},
+    {name:"Vanilla Cake", sizes:[["½ Pound","300"],["1 Pound","450"]]},
+    {name:"Bento Cake", sizes:[["200 gm","250"]]}
+  ]
+};
+
+let settings = structuredClone(defaultSettings);
+
+function money(v){ return "₹" + Number(v || 0).toLocaleString("en-IN"); }
+
+function render(){
+  document.getElementById("shopName").textContent = settings.name;
+  document.getElementById("shopSubtitle").textContent = settings.subtitle;
+  document.getElementById("footerName").textContent = settings.name + " • Dinhata";
+
+  const menu = document.getElementById("menu");
+  const cake = document.getElementById("cake");
+  menu.innerHTML = "";
+  cake.innerHTML = "";
+
+  settings.products.forEach((p, pi)=>{
+    const card = document.createElement("div");
+    card.className = "cake";
+    card.innerHTML = "<h2>"+esc(p.name)+"</h2>";
+    p.sizes.forEach(s=>{
+      card.innerHTML += '<div class="row"><span>'+esc(s[0])+'</span><strong>'+money(s[1])+'</strong></div>';
+      const opt = document.createElement("option");
+      opt.value = p.name + " - " + s[0] + " - " + money(s[1]);
+      opt.textContent = opt.value;
+      cake.appendChild(opt);
+    });
+    menu.appendChild(card);
+  });
+}
+
+function esc(str){
+  return String(str ?? "").replace(/[&<>"']/g, m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+function sendOrder(){
+  const cake = document.getElementById("cake").value;
+  const name = document.getElementById("name").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const date = document.getElementById("date").value;
+
+  if(!name || !address || !date){
+    alert("Please fill in your name, address and delivery date.");
+    return;
+  }
+
+  const message =
+`Hello ${settings.name}!
+
+I would like to place an order.
+
+Cake: ${cake}
+Customer Name: ${name}
+Delivery Address: ${address}
+Delivery Date: ${date}
+
+Please confirm my order.`;
+
+  const url = "https://wa.me/919239349197?text=" + encodeURIComponent(message);
+  window.open(url, "_blank");
+}
+
+(function(){
+  const d = new Date();
+  d.setDate(d.getDate()+1);
+  const yyyy=d.getFullYear();
+  const mm=String(d.getMonth()+1).padStart(2,"0");
+  const dd=String(d.getDate()).padStart(2,"0");
+  document.getElementById("date").min = `${yyyy}-${mm}-${dd}`;
+  render();
+})();
+</script>
+</body>
+</html>
